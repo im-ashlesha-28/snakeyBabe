@@ -9,11 +9,16 @@ import asyncio
 pygame.init()
 
 # Constants
-HEADER_HEIGHT = 80
-WIDTH, HEIGHT = 600, 600 + HEADER_HEIGHT
+HEADER_HEIGHT = 100
+WALL_THICKNESS = 15
+PLAY_WIDTH, PLAY_HEIGHT = 600, 600
+WIDTH = PLAY_WIDTH + 2 * WALL_THICKNESS
+HEIGHT = HEADER_HEIGHT + PLAY_HEIGHT + 2 * WALL_THICKNESS
 CELL_SIZE = 20
-COLS = WIDTH // CELL_SIZE
-ROWS = (HEIGHT - HEADER_HEIGHT) // CELL_SIZE
+COLS = PLAY_WIDTH // CELL_SIZE
+ROWS = PLAY_HEIGHT // CELL_SIZE
+OFFSET_X = WALL_THICKNESS
+OFFSET_Y = HEADER_HEIGHT + WALL_THICKNESS
 FPS_START = 10.0
 FPS_MAX = 20.0
 
@@ -227,7 +232,7 @@ class Game:
             self.score += 1
             if self.score % 5 == 0 and self.fps < FPS_MAX:
                 self.fps += 0.5
-            self.sparkles.append(Sparkle(self.food[0] * CELL_SIZE + CELL_SIZE//2, self.food[1] * CELL_SIZE + CELL_SIZE//2 + HEADER_HEIGHT))
+            self.sparkles.append(Sparkle(self.food[0] * CELL_SIZE + CELL_SIZE//2 + OFFSET_X, self.food[1] * CELL_SIZE + CELL_SIZE//2 + OFFSET_Y))
             self.food = self.spawn_food()
         else:
             self.snake.pop()
@@ -245,28 +250,37 @@ class Game:
     def draw(self, surface):
         surface.fill(BG_COLOR)
         
-        # Draw cute polka dots in the play area
-        for x in range(0, WIDTH, CELL_SIZE * 2):
-            for y in range(HEADER_HEIGHT, HEIGHT, CELL_SIZE * 2):
-                pygame.draw.circle(surface, (255, 230, 240), (x + CELL_SIZE, y + CELL_SIZE), 3)
+        # 2. Draw distinct scoreboard header
+        pygame.draw.rect(surface, (255, 255, 255), (0, 0, WIDTH, HEADER_HEIGHT))
+        pygame.draw.line(surface, UI_BORDER_COLOR, (0, HEADER_HEIGHT), (WIDTH, HEADER_HEIGHT), 4)
+        
+        # 3. Draw Thick Boundary Wall explicitly
+        wall_rect = pygame.Rect(0, HEADER_HEIGHT, WIDTH, HEIGHT - HEADER_HEIGHT)
+        pygame.draw.rect(surface, UI_BORDER_COLOR, wall_rect)
+        
+        # 4. Fill Play Zone background
+        play_rect = pygame.Rect(OFFSET_X, OFFSET_Y, PLAY_WIDTH, PLAY_HEIGHT)
+        pygame.draw.rect(surface, BG_COLOR, play_rect)
+        
+        # Draw cute polka dots inside play area
+        for x in range(0, PLAY_WIDTH, CELL_SIZE * 2):
+            for y in range(0, PLAY_HEIGHT, CELL_SIZE * 2):
+                pygame.draw.circle(surface, (255, 230, 240), (x + CELL_SIZE + OFFSET_X, y + CELL_SIZE + OFFSET_Y), 3)
 
         # Draw a perfect grid for the play area
-        for x in range(0, WIDTH + 1, CELL_SIZE):
-            pygame.draw.line(surface, GRID_COLOR, (x, HEADER_HEIGHT), (x, HEIGHT))
-        for y in range(HEADER_HEIGHT, HEIGHT + 1, CELL_SIZE):
-            pygame.draw.line(surface, GRID_COLOR, (0, y), (WIDTH, y))
-            
-        # Draw Border
-        pygame.draw.rect(surface, UI_BORDER_COLOR, (0, HEADER_HEIGHT, WIDTH, HEIGHT - HEADER_HEIGHT), 4)
+        for x in range(0, PLAY_WIDTH + 1, CELL_SIZE):
+            pygame.draw.line(surface, GRID_COLOR, (x + OFFSET_X, OFFSET_Y), (x + OFFSET_X, OFFSET_Y + PLAY_HEIGHT))
+        for y in range(0, PLAY_HEIGHT + 1, CELL_SIZE):
+            pygame.draw.line(surface, GRID_COLOR, (OFFSET_X, y + OFFSET_Y), (OFFSET_X + PLAY_WIDTH, y + OFFSET_Y))
             
         # Draw Food
         fx, fy = self.food
-        draw_strawberry(surface, fx * CELL_SIZE, fy * CELL_SIZE + HEADER_HEIGHT, CELL_SIZE)
+        draw_strawberry(surface, fx * CELL_SIZE + OFFSET_X, fy * CELL_SIZE + OFFSET_Y, CELL_SIZE)
         
         # Draw Snake
         for i, (sx, sy) in enumerate(reversed(self.snake)):
-            px = sx * CELL_SIZE
-            py = sy * CELL_SIZE + HEADER_HEIGHT
+            px = sx * CELL_SIZE + OFFSET_X
+            py = sy * CELL_SIZE + OFFSET_Y
             real_index = len(self.snake) - 1 - i
             
             if real_index == 0:
@@ -318,8 +332,8 @@ class Game:
             s_surf = font_medium.render(score_text, True, TEXT_COLOR)
             b_surf = font_medium.render(best_text, True, TEXT_COLOR)
             
-            s_rect = s_surf.get_rect(topleft=(20, 20))
-            b_rect = b_surf.get_rect(topright=(WIDTH - 20, 20))
+            s_rect = s_surf.get_rect(midleft=(20, HEADER_HEIGHT//2))
+            b_rect = b_surf.get_rect(midright=(WIDTH - 20, HEADER_HEIGHT//2))
             
             # Pill background for score
             bg_rect_s = s_rect.inflate(20, 10)
@@ -333,12 +347,12 @@ class Game:
             rounded_rect(surface, UI_BORDER_COLOR, bg_rect_b, 15, 2)
             surface.blit(b_surf, b_rect)
             
+            # Title top center
+            draw_text(surface, "snakey babe 🎀", font_medium, TEXT_COLOR, WIDTH//2, HEADER_HEIGHT//2 - 15, shadow=True)
+            
             # Fun message
             msg = "go girl! 💖" if self.score > 0 else "you got this! 💕"
-            draw_text(surface, msg, font_medium, TEXT_COLOR, WIDTH//2, HEIGHT - 30, shadow=True)
-            
-            # Title top center
-            draw_text(surface, "snakey babe 🎀", font_medium, TEXT_COLOR, WIDTH//2, 35, shadow=True)
+            draw_text(surface, msg, font_small, TEXT_COLOR, WIDTH//2, HEADER_HEIGHT//2 + 20, shadow=False)
 
         elif self.state == "START":
             # Overlay
