@@ -1,4 +1,4 @@
-# 🎀 snakey babe 🎀
+# SnakeyBabe 
 
 A totally girly, ultra-kawaii version of the classic Snake game, built in Python using Pygame! Playable natively on desktop or directly in the browser. 💖
 
