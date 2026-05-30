@@ -24,7 +24,7 @@ jobs:
         run: pip install pygbag
         
       - name: Build Web App
-        run: python -m pygbag --build .
+        run: python -m pygbag --build --template static/default.tmpl .
         
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

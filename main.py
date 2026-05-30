@@ -47,10 +47,17 @@ try:
 except:
     emoji_font_name = font_name
 
-font_title = pygame.font.SysFont(font_name, 48, bold=True)
-font_large = pygame.font.SysFont(font_name, 36, bold=True)
-font_medium = pygame.font.SysFont(font_name, 24, bold=True)
-font_small = pygame.font.SysFont(font_name, 18, bold=True)
+try:
+    font_path = "assets/Pacifico.ttf"
+    font_title = pygame.font.Font(font_path, 48)
+    font_large = pygame.font.Font(font_path, 36)
+    font_medium = pygame.font.Font(font_path, 24)
+    font_small = pygame.font.Font(font_path, 18)
+except:
+    font_title = pygame.font.SysFont(font_name, 48, bold=True)
+    font_large = pygame.font.SysFont(font_name, 36, bold=True)
+    font_medium = pygame.font.SysFont(font_name, 24, bold=True)
+    font_small = pygame.font.SysFont(font_name, 18, bold=True)
 
 font_emoji_large = pygame.font.SysFont(emoji_font_name, 48)
 font_emoji_medium = pygame.font.SysFont(emoji_font_name, 24)
@@ -330,8 +337,18 @@ class Game:
             overlay.fill((255, 240, 246, 180))
             surface.blit(overlay, (0,0))
             
-            draw_text(surface, "snakey babe 🎀", font_title, TEXT_COLOR, WIDTH//2, HEIGHT//2 - 40, shadow=True)
-            draw_text(surface, "press SPACE to play 💕", font_medium, TEXT_COLOR, WIDTH//2, HEIGHT//2 + 40)
+            draw_text(surface, "snakey babe 🎀", font_title, TEXT_COLOR, WIDTH//2, HEIGHT//2 - 100, shadow=True)
+            
+            # Pulse logic for "press SPACE"
+            pulse = math.sin(pygame.time.get_ticks() / 200.0) * 10
+            draw_text(surface, "press SPACE to play 💕", font_medium, TEXT_COLOR, WIDTH//2, HEIGHT//2 - 20 + pulse)
+            
+            # Tutorial text
+            t_color = (224, 96, 144)
+            draw_text(surface, "How to play:", font_medium, t_color, WIDTH//2, HEIGHT//2 + 60)
+            draw_text(surface, "use arrow keys to move 🎀", font_small, t_color, WIDTH//2, HEIGHT//2 + 90)
+            draw_text(surface, "eat strawberries 🍓 to grow", font_small, t_color, WIDTH//2, HEIGHT//2 + 115)
+            draw_text(surface, "don't hit walls or yourself 💕", font_small, t_color, WIDTH//2, HEIGHT//2 + 140)
             
         elif self.state == "PAUSED":
             overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
