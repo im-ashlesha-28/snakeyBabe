@@ -9,10 +9,11 @@ import asyncio
 pygame.init()
 
 # Constants
-WIDTH, HEIGHT = 600, 600
+HEADER_HEIGHT = 80
+WIDTH, HEIGHT = 600, 600 + HEADER_HEIGHT
 CELL_SIZE = 20
 COLS = WIDTH // CELL_SIZE
-ROWS = HEIGHT // CELL_SIZE
+ROWS = (HEIGHT - HEADER_HEIGHT) // CELL_SIZE
 FPS_START = 10.0
 FPS_MAX = 20.0
 
@@ -226,7 +227,7 @@ class Game:
             self.score += 1
             if self.score % 5 == 0 and self.fps < FPS_MAX:
                 self.fps += 0.5
-            self.sparkles.append(Sparkle(self.food[0] * CELL_SIZE + CELL_SIZE//2, self.food[1] * CELL_SIZE + CELL_SIZE//2))
+            self.sparkles.append(Sparkle(self.food[0] * CELL_SIZE + CELL_SIZE//2, self.food[1] * CELL_SIZE + CELL_SIZE//2 + HEADER_HEIGHT))
             self.food = self.spawn_food()
         else:
             self.snake.pop()
@@ -244,19 +245,28 @@ class Game:
     def draw(self, surface):
         surface.fill(BG_COLOR)
         
-        # Draw cute polka dots
+        # Draw cute polka dots in the play area
         for x in range(0, WIDTH, CELL_SIZE * 2):
-            for y in range(0, HEIGHT, CELL_SIZE * 2):
+            for y in range(HEADER_HEIGHT, HEIGHT, CELL_SIZE * 2):
                 pygame.draw.circle(surface, (255, 230, 240), (x + CELL_SIZE, y + CELL_SIZE), 3)
+
+        # Draw a perfect grid for the play area
+        for x in range(0, WIDTH + 1, CELL_SIZE):
+            pygame.draw.line(surface, GRID_COLOR, (x, HEADER_HEIGHT), (x, HEIGHT))
+        for y in range(HEADER_HEIGHT, HEIGHT + 1, CELL_SIZE):
+            pygame.draw.line(surface, GRID_COLOR, (0, y), (WIDTH, y))
+            
+        # Draw Border
+        pygame.draw.rect(surface, UI_BORDER_COLOR, (0, HEADER_HEIGHT, WIDTH, HEIGHT - HEADER_HEIGHT), 4)
             
         # Draw Food
         fx, fy = self.food
-        draw_strawberry(surface, fx * CELL_SIZE, fy * CELL_SIZE, CELL_SIZE)
+        draw_strawberry(surface, fx * CELL_SIZE, fy * CELL_SIZE + HEADER_HEIGHT, CELL_SIZE)
         
         # Draw Snake
         for i, (sx, sy) in enumerate(reversed(self.snake)):
             px = sx * CELL_SIZE
-            py = sy * CELL_SIZE
+            py = sy * CELL_SIZE + HEADER_HEIGHT
             real_index = len(self.snake) - 1 - i
             
             if real_index == 0:
