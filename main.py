@@ -244,11 +244,10 @@ class Game:
     def draw(self, surface):
         surface.fill(BG_COLOR)
         
-        # Draw grid
-        for x in range(0, WIDTH, CELL_SIZE):
-            pygame.draw.line(surface, GRID_COLOR, (x, 0), (x, HEIGHT))
-        for y in range(0, HEIGHT, CELL_SIZE):
-            pygame.draw.line(surface, GRID_COLOR, (0, y), (WIDTH, y))
+        # Draw cute polka dots
+        for x in range(0, WIDTH, CELL_SIZE * 2):
+            for y in range(0, HEIGHT, CELL_SIZE * 2):
+                pygame.draw.circle(surface, (255, 230, 240), (x + CELL_SIZE, y + CELL_SIZE), 3)
             
         # Draw Food
         fx, fy = self.food
